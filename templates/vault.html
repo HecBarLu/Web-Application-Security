@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Vault - Secure Password Manager</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 30px auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; }
+        .flash { color: green; font-weight: bold; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <div class="top-bar">
+        <h2>Encrypted Vault ({{ username }})</h2>
+        <form method="POST" action="{{ url_for('logout') }}">
+            <button type="submit">Logout</button>
+        </form>
+    </div>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for message in messages %}
+          <div class="flash">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <h3>Add New Credential</h3>
+    <form method="POST" action="{{ url_for('add_credential') }}">
+        <input type="text" name="site_url" placeholder="Website URL (e.g., https://example.com)" required>
+        <input type="text" name="site_username" placeholder="Username / Email" required>
+        <input type="password" name="password" placeholder="Password to encrypt" required>
+        <button type="submit">Encrypt & Save</button>
+    </form>
+
+    <h3>Stored Credentials</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Website</th>
+                <th>Username</th>
+                <th>Decrypted Password</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr>
+                <td>{{ item.site_url }}</td>
+                <td>{{ item.site_username }}</td>
+                <td><code>{{ item.password }}</code></td>
+                <td>
+                    <form method="POST" action="{{ url_for('delete_credential', item_id=item.id) }}">
+                        <button type="submit">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="4">No credentials stored yet.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
