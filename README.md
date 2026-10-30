@@ -1,33 +1,38 @@
-# Web-Application-Security
-Project for Web Application Security
 # Secure Password Manager
 
 ## Scope
-This project is a web-based secure password manager developed for the Web Application Security course at TalTech. It provides a secure, encrypted digital vault for users to store, retrieve, and manage their web credentials. The application is built with a "shift-left" security philosophy, designed from the ground up to mitigate OWASP Top 10 vulnerabilities, enforce strict access controls, and utilize robust cryptographic standards to protect data at rest and in transit.
+This project is a web-based secure password manager developed for the Web Application Security course at TalTech. It provides an encrypted digital vault for users to store, retrieve, and manage their credentials safely.
 
-## Planned Features
-*   **Secure Authentication:** Strong master password hashing (e.g., Argon2id) and secure session management using `HttpOnly`, `Secure`, and `SameSite` cookies.
-*   **Data-at-Rest Encryption:** Vault credentials encrypted using AES-256-GCM before database insertion.
-*   **Injection Prevention:** Strict server-side input sanitization and parameterized database queries to neutralize XSS and SQL Injection risks.
-*   **Error Handling:** Generic client-facing error messages to prevent stack trace and system information disclosure.
+## Checkpoint 2 - Progress Note (Week 9)
+* Working Web Interface: Built with Flask and Jinja2 templates (login.html, register.html, vault.html) covering registration, login, credential encryption/decryption, and deletion.
+* Authentication & Password Hashing: Implemented using Argon2id (argon2-cffi). Master passwords are never stored in plaintext.
+* Server-Side Encryption: Vault entries are encrypted at rest using AES-256-GCM with random 12-byte IVs. The 256-bit key is derived dynamically upon login from the user's master password and a unique 16-byte salt via PBKDF2HMAC (SHA-256, 200,000 iterations).
+* Secure Session Management: Configured with HttpOnly=True, Secure=True, SameSite='Strict', session regeneration upon login (to prevent session fixation), and a 15-minute idle timeout.
+* TLS Setup: Served locally over HTTPS ([https://127.0.0.1:5000](https://127.0.0.1:5000)) using a 4096-bit RSA self-signed certificate.
 
-## Planned Routes
-**Authentication & Sessions:**
-*   `GET /` - Landing page and login interface.
-*   `POST /api/auth/register` - Register a new user and generate cryptographic salts.
-*   `POST /api/auth/login` - Authenticate user and issue secure session token.
-*   `POST /api/auth/logout` - Invalidate and destroy the active session.
-
-**Vault Management:**
-*   `GET /vault` - User dashboard interface (protected route).
-*   `GET /api/vault/items` - Fetch and decrypt the user's stored credentials.
-*   `POST /api/vault/add` - Encrypt and insert a new credential into the vault.
-*   `DELETE /api/vault/item/<id>` - Securely delete a credential.
-
-## How to Run Locally (Development Setup)
-*Note: These instructions outline the planned local execution flow and will be finalized in Checkpoint 2.*
+## How to Run Locally (Clean Machine Instructions)
 
 ### Prerequisites
-*   Git
-*   Python 3.10+ / Node.js (depending on the final backend framework chosen)
-*   Docker & Docker Compose (recommended for isolated database provisioning)
+* Python 3.10+
+* Git Bash (or any terminal with OpenSSL installed)
+
+### Step-by-Step Execution
+1. Clone the repository and enter the directory:
+   git clone <YOUR_GITHUB_REPO_URL>
+   cd <YOUR_REPO_FOLDER>
+
+2. Create and activate a virtual environment:
+   python -m venv venv
+   source venv/Scripts/activate
+
+3. Install the required packages:
+   pip install -r requirements.txt
+
+4. Generate the self-signed TLS certificates:
+   mkdir -p certs
+   MSYS_NO_PATHCONV=1 openssl req -x509 -newkey rsa:4096 -nodes -out certs/cert.pem -keyout certs/key.pem -days 365 -subj "/CN=localhost"
+
+5. Start the application:
+   python app.py
+
+6. Open your browser and go to [https://127.0.0.1:5000](https://127.0.0.1:5000) (accept the self-signed certificate warning in the browser).
