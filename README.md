@@ -3,36 +3,35 @@
 ## Scope
 This project is a web-based secure password manager developed for the Web Application Security course at TalTech. It provides an encrypted digital vault for users to store, retrieve, and manage their credentials safely.
 
-## Checkpoint 2 - Progress Note (Week 9)
-* Working Web Interface: Built with Flask and Jinja2 templates (login.html, register.html, vault.html) covering registration, login, credential encryption/decryption, and deletion.
-* Authentication & Password Hashing: Implemented using Argon2id (argon2-cffi). Master passwords are never stored in plaintext.
-* Server-Side Encryption: Vault entries are encrypted at rest using AES-256-GCM with random 12-byte IVs. The 256-bit key is derived dynamically upon login from the user's master password and a unique 16-byte salt via PBKDF2HMAC (SHA-256, 200,000 iterations).
-* Secure Session Management: Configured with HttpOnly=True, Secure=True, SameSite='Strict', session regeneration upon login (to prevent session fixation), and a 15-minute idle timeout.
-* TLS Setup: Served locally over HTTPS ([https://127.0.0.1:5000](https://127.0.0.1:5000)) using a 4096-bit RSA self-signed certificate.
+## Checkpoint 3 - Near-Final State (Week 12)
+* **SQL Injection Prevention:** Exclusively uses parameterized SQLite queries (`?` placeholders) across all database operations. Verified against authentication bypass and stacked query payloads.
+* **XSS Defences:** Context-aware Jinja2 auto-escaping, strict URL scheme validation (blocking `javascript:` and `data:` URIs), and strict HTTP security headers (`Content-Security-Policy`, `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`).
+* **Per-User Access Control (IDOR Prevention):** Every vault read (`/vault/view/<id>`) and delete (`/vault/delete/<id>`) query enforces ownership (`WHERE id = ? AND user_id = ?`). Unauthorized cross-user attempts return HTTP `403 Forbidden` and trigger a security log alert.
+* **CSRF Protection:** Cryptographic synchronizer tokens (`csrf_token`) validated via constant-time comparison (`secrets.compare_digest`) on all state-changing `POST` requests.
+* **Secure Error Handling & Structured Logging:** Custom error handlers (`400`, `403`, `404`, `500`) prevent stack trace leakage. Security events are recorded in JSON-structured format inside `security.log`.
 
 ## How to Run Locally (Clean Machine Instructions)
 
-### Prerequisites
-* Python 3.10+
-* Git Bash (or any terminal with OpenSSL installed)
+### 1. Setup Environment
 
-### Step-by-Step Execution
-1. Clone the repository and enter the directory:
-   git clone <YOUR_GITHUB_REPO_URL>
-   cd <YOUR_REPO_FOLDER>
+    git clone [https://github.com/HecBarLu/Web-Application-Security.git](https://github.com/HecBarLu/Web-Application-Security.git)
+    cd Web-Application-Security
+    python -m venv venv
+    source venv/Scripts/activate
+    pip install -r requirements.txt
 
-2. Create and activate a virtual environment:
-   python -m venv venv
-   source venv/Scripts/activate
+### 2. Generate Self-Signed TLS Certificates
 
-3. Install the required packages:
-   pip install -r requirements.txt
+    unset OPENSSL_CONF
+    mkdir -p certs
+    MSYS_NO_PATHCONV=1 openssl req -x509 -newkey rsa:4096 -nodes -out certs/cert.pem -keyout certs/key.pem -days 365 -subj "/CN=localhost"
 
-4. Generate the self-signed TLS certificates:
-   mkdir -p certs
-   MSYS_NO_PATHCONV=1 openssl req -x509 -newkey rsa:4096 -nodes -out certs/cert.pem -keyout certs/key.pem -days 365 -subj "/CN=localhost"
+### 3. Run Automated Security Test Suite (Checkpoint 3 Evidence)
 
-5. Start the application:
-   python app.py
+    python test_security.py
 
-6. Open your browser and go to [https://127.0.0.1:5000](https://127.0.0.1:5000) (accept the self-signed certificate warning in the browser).
+### 4. Start the Application
+
+    python app.py
+
+Open `[https://127.0.0.1:5000](https://127.0.0.1:5000)` in your browser.
