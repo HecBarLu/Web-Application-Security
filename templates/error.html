@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Error {{ code }} - Secure Password Manager</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 500px; margin: 60px auto; text-align: center; }
+        .box { border: 1px solid #e0e0e0; padding: 25px; border-radius: 6px; background: #fafafa; }
+        h2 { color: #c00; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2>Security Error {{ code }}</h2>
+        <p>{{ message }}</p>
+        <p><a href="{{ url_for('index') }}">Return to Vault</a></p>
+    </div>
+</body>
+</html>

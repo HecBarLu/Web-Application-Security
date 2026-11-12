@@ -20,10 +20,11 @@
       {% endif %}
     {% endwith %}
     <form method="POST" action="{{ url_for('register') }}">
-        <label>Username:</label>
-        <input type="text" name="username" required>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label>Username (3-32 alphanumeric chars):</label>
+        <input type="text" name="username" maxlength="32" required>
         <label>Master Password (min. 8 chars):</label>
-        <input type="password" name="password" minlength="8" required>
+        <input type="password" name="password" minlength="8" maxlength="128" required>
         <button type="submit">Register</button>
     </form>
     <p>Already registered? <a href="{{ url_for('login') }}">Login here</a></p>
